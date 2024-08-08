@@ -1,0 +1,38 @@
+
+name: Brendan Reilly
+netid: bar164
+Project 3: My shell
+
+Description:  This program is to create a Unix-style command line interpreter.
+              It passes most test cases. I provide a make file compile it using 'make'
+              make intr: ./mysh runs interactive mode
+              make batch: ./mysh test.sh runs batch mode
+
+Design: In my program I use four functions; int main, void execute_command, void execute_conditional, char ***convert_dataType
+        
+        Int Main: My main function is divided into two parts for interactive and batch mode.
+                  It assumes that there are a maximum of two arguments
+                  In interactive mode I parse commands in a while loop.
+                    - First each command is tokenized with strtok and store the tokens in args[] array.
+                    - Then, I use conditional statements to check for special commands like
+                      -> exit, then, else, cd (these are special commands that require special execution)
+                      -> exit breaks the while loop and session. then and else prompt the execute_conditional function. cd requires the use of chdir() function from <unistd.h>
+                    - Otherwise invoke the execute_command function passing args (array of command tokens)
+                  Batch mode is similar in the way it processes commands except it is reading from a file and not stdin
+                  Returns 0 upon completion of all commands, else error
+        
+        void execute_command: In function void execute_command I create child processes to execute commands with a specified input and output direction
+                         The child process duplicates the file descriptors for the command and executes the command with execvp
+                         The parent waits for the status of the child before continuing
+                         - In this function I added a while loop to iterate over the args array to check for redirection and pipeline operators
+                         - In the while loop the in, out file descriptors are set based on redirection operators
+                         - AND the pipeline operator | creates a pipe and forks the process to control the pipeline
+                           -> The child process duplicates the file descriptors for the pipeline and executes the command.
+                           -> The parent waits for the child process to finish and duplicates descriptors for the next command.
+
+        * I was not able to successfully implement the clauses for then, else, | so I did not include those methods
+        * Also for some reason the the formating of my interactive mode is weird, I was unable to figure out why or how to fix it but these errors were persistent:
+          mysh> Good-bye!
+          I use function getcwd() as requested in the description but this creates a print error in interactive mode. mysh> /User/brendan/214/P3. The next input line is blank
+            - However I testd my design without getcwd() and the pwd command works correctly
+          Also the last time I tested interative mode I had to type 'exit' twice, but I was running a lot of commands in the mysh> seesion. This is the only time it happened

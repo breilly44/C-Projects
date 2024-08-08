@@ -1,0 +1,59 @@
+
+Name: Brendan Reilly
+
+
+Test Cases:
+
+- in my zip file I have multiple directories and files
+
+- P2 is the directory containing my make file and spchk.c program
+
+- dictionary is a sample dictionary file containing 10,000 words (~67KB)
+	-> In some of my test cases I use 'couch' which is not included in dictionary
+
+- my_files is a directory containing multiple test files: file1, file2 ...
+
+* I was not able to succesfully pass all tests
+ -> I converted words to lowercase before spell checking
+ -> I cannot recursively spell check a directory containing multiple files
+	- e.g. if the argument I pass is
+		./spchk ../dictionary ../my_files
+	- only the first file the program encounters (file1) in directory my_files is spell checked
+ -> however I can pass multiple argument files like so
+	./spchk ../dictionary ../my_files/file1 ../my_files/file2 ../my_files/file3
+ -> I include some test cases in my make file
+
+
+Makefile:
+- make
+	-> compiles spchk.c
+- make test1
+	-> compiles and runs test program 1 ../dict ../my_files
+- make test2
+	-> compiles and runs test program 2 /usr/share/dict/words ../my_files
+- make test3
+	-> compiles and runs test program 3 /usr/share/dict/words ../testfile ../my_files/file2
+
+
+Design:
+
+- my program first checks if the number of arguments in command line are valid
+- I then pass the dictionary path to load_dictionary
+	-> this function opens the path to dictionary with 'r' permission
+	-> load_dictionary reads the dictionary file line by line and stores each word into the dictionary array
+	-> the function also converts words to lowercase before storing in the array
+	-> the function uses dynamic heap memory to allocate for the array
+		- malloc, realloc
+- the program then processes each argument after the dictionary file
+- I attempted to recursively process all text files in a directory with process_directory
+	-> uses opendir(), readdir(), and closedir()
+	-> skips hidden files and directories and processes files using process_file
+- If the argument is a file, the program processes it in process_file
+	-> reads file contents line by line and creates a token for each for with strtok
+	-> then calls a binary_search function to search a word in the dictionary array
+- binary_search finds the index of a given word in the dictionary array
+	-> first converts each word in the dictionary to lowercase with to_lowercase function
+- report_misspelled_word reports a misspelled word with file path, line/column number, and the word
+- free_dictionary frees the dynamically allocated memory for the dictionary array
+	-> iterates the array and frees each word, then the array itself
+- various codes are commented out for debugging purposes
